@@ -22,7 +22,7 @@ export default class BlogController {
       title: req.body.postTitle as string,
       contents: req.body.postContents as string,
       author: req.body.postAuthor as string,
-      creationDate: new Date(req.params.body as string),
+      creationDate: new Date(req.body.postDate as string),
       updateDates: []
     };
     this.postDatabaseService
