@@ -2,14 +2,28 @@ import { Request, Response, NextFunction } from "express";
 import PostDatabaseService from "../services/post-database.service";
 import Post from "../models/post.model";
 
+/**
+ * Functions to handle different requests related to the blog.
+ * 
+ * @author Willow Sapphire
+ * @version 04/10/2023
+ */
 export default class BlogController {
 
+  /**
+   * Constructs a new BlogController.
+   * 
+   * @param postDatabaseService a service used to interact with the databsase
+   */
   constructor(private postDatabaseService: PostDatabaseService) {}
 
   /*
-   * Expects post object as body
+   * Expects a post object as the body
    */
   createPost = (req: Request, res: Response, next: NextFunction) => {
+    // Do not save posts that have no title.
+    if (req.body.title === undefined || req.body.title === null || req.body.title.length < 1)
+      res.status(500);
     let post: Post = {
       id: req.body.title as string + Date.now().toFixed(),
       title: req.body.title as string,

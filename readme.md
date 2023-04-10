@@ -14,10 +14,15 @@ GET /api/blog/:postTitle<br>
 Returns the post with the given title<br><br>
 POST /api/blog<br>
 Adds a new post to the database<br>
-Requires body in the form: 
-{
-    postTitle,
-    postContents,
-    postAuthor,
-    postDate,
-}
+Expects a Post object in the request body<br><br>
+PUT /api/blog/:originalTitle/edit<br>
+Edits an existing post in the database<br>
+Expects a body in the form<br>
+{<br>
+    newTitle: string,<br>
+    newContents: string,<br>
+    newAuthor: string,<br>
+    newDate: date<br>
+}<br><br>
+DELETE /api/blog/postTitle<br>
+Deletes the post with the given title from the database<br>

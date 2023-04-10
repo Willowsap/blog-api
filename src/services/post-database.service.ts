@@ -1,21 +1,45 @@
 import path from "path";
 import Post from "../models/post.model";
-import UtilService from "./util.service";
+import fs from "fs";
 
-export default class PostDatabaseService {
-  private postPath = path.resolve(__dirname, "../../db/posts.json")
+/**
+ * Service for interacting with the simple json database.
+ * 
+ * @author Willow Sapphire
+ * @version 04/10/2023
+ */
+export default class PostDatabaseService
+{
+  /**
+   * The path to the json database file.
+   */
+  private postPath = path.resolve(__dirname, "../../db/posts.json");
+
+  /**
+   * The contents of the database that were last retrieved.
+   */
   private currFileContents: Array<Post> | undefined;
 
+  /**
+   * Adds a post to the database file.
+   * 
+   * @param post the post to add
+   */
   createPost({post}: {post: Post}) {
     this.assureFileRead();
-    let fileContents = UtilService.getFileContents(this.postPath);
-    if (fileContents === undefined || fileContents === "")
-      fileContents = "[]";
+    let fileContents = this.getDatabaseContents();
+    if (fileContents === undefined || fileContents === "") fileContents = "[]";
     this.currFileContents = JSON.parse(fileContents);
     this.currFileContents!.push(post);
     this.updatePostFile();
   };
 
+  /**
+   * Gets a single post From the databaser.
+   * 
+   * @param param0 
+   * @returns the post or null if the post was not found
+   */
   getPost({postTitle}: {postTitle: string}): Post | null {
     this.assureFileRead();
     for (let val of this.currFileContents!)
@@ -68,7 +92,7 @@ export default class PostDatabaseService {
 
   private assureFileRead() {
     if (this.currFileContents === undefined) {
-      let fileContents = UtilService.getFileContents(this.postPath);
+      let fileContents = this.getDatabaseContents();
       if (fileContents === undefined || fileContents.length < 1) {
         this.currFileContents = [];
       }
@@ -78,8 +102,19 @@ export default class PostDatabaseService {
     }
   }
 
+  /**
+   * Helper method to update the database file.
+   */
   private updatePostFile() {
-    UtilService.setFileContents(
-      this.postPath, JSON.stringify(this.currFileContents));
+    fs.writeFileSync(this.postPath, JSON.stringify(this.currFileContents));
+  }
+
+  /**
+   * Helper method to get the contents of the database.
+   * 
+   * @returns the contents of the file or undefined if the file ws not found
+   */
+  private getDatabaseContents(): string | undefined {
+    return fs.readFileSync(this.postPath, "utf8");
   }
 }
