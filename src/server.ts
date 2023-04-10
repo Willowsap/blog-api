@@ -1,5 +1,4 @@
 import http from "http";
-import https from "https";
 import app from "./app";
 
 const normalizePort = (val: string) => {

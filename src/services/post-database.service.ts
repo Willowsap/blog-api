@@ -3,13 +3,10 @@ import Post from "../models/post.model";
 import UtilService from "./util.service";
 
 export default class PostDatabaseService {
-  private postFolder = path.resolve(__dirname, "../../db");
-  private postPath = this.postFolder + "/posts.json";
+  private postPath = path.resolve(__dirname, "../../db/posts.json")
   private currFileContents: Array<Post> | undefined;
 
-  constructor(){}
-
-  createPost(post: Post) {
+  createPost({post}: {post: Post}) {
     this.assureFileRead();
     let fileContents = UtilService.getFileContents(this.postPath);
     if (fileContents === undefined || fileContents === "")
@@ -19,11 +16,7 @@ export default class PostDatabaseService {
     this.updatePostFile();
   };
 
-  getPost({
-    postTitle
-  }: {
-    postTitle: string;
-  }): Post | null {
+  getPost({postTitle}: {postTitle: string}): Post | null {
     this.assureFileRead();
     for (let val of this.currFileContents!)
       if (val.title === postTitle)
@@ -36,30 +29,33 @@ export default class PostDatabaseService {
     return this.currFileContents;
   }
 
-  updatePostContents({
-    postTitle,
+  updatePost({
+    originalTitle,
+    newTitle,
     newContents,
-    dateChange,
+    newAuthor,
+    date,
   }: {
-    postTitle: string,
+    originalTitle: string,
+    newTitle: string,
     newContents: string,
-    dateChange: Date,
+    newAuthor: string,
+    date: Date,
   }) {
     this.assureFileRead();
     for (let post of this.currFileContents!) {
-      if (post.title === postTitle) {
+      if (post.title === originalTitle) {
+        post.title = newTitle,
         post.contents = newContents;
-        post.updateDates.push(dateChange);
+        post.author = newAuthor;
+        post.dates.push(date);
         break;
       }
     }
+    this.updatePostFile();
   }
 
-  deletePost({
-    postTitle
-  }: {
-    postTitle: string;
-  }) {
+  deletePost({postTitle}: {postTitle: string;}) {
     this.assureFileRead();
     let newFileContents: Array<Post> = [];
     this.currFileContents!.forEach((post: Post) => {
@@ -83,6 +79,7 @@ export default class PostDatabaseService {
   }
 
   private updatePostFile() {
-    UtilService.setFileContents(this.postPath, JSON.stringify(this.currFileContents));
+    UtilService.setFileContents(
+      this.postPath, JSON.stringify(this.currFileContents));
   }
 }

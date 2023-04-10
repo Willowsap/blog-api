@@ -1,33 +1,25 @@
 import { Request, Response, NextFunction } from "express";
 import PostDatabaseService from "../services/post-database.service";
+import Post from "../models/post.model";
 
 export default class BlogController {
 
-  private postDatabaseService;
-
-  constructor(pdbs: PostDatabaseService) {
-    this.postDatabaseService = pdbs;
-  }
+  constructor(private postDatabaseService: PostDatabaseService) {}
 
   /*
-   * Expects body with:
-   *    postTitle
-   *    postContents
-   *    postAuthor
-   *    postDate
+   * Expects post object as body
    */
   createPost = (req: Request, res: Response, next: NextFunction) => {
-    let post = {
-      id: req.body.postTitle as string + Date.now().toFixed(),
-      title: req.body.postTitle as string,
-      contents: req.body.postContents as string,
-      author: req.body.postAuthor as string,
-      creationDate: new Date(req.body.postDate as string),
-      updateDates: []
+    let post: Post = {
+      id: req.body.title as string + Date.now().toFixed(),
+      title: req.body.title as string,
+      contents: req.body.contents as string,
+      author: req.body.author as string,
+      dates: req.body.dates as Date[],
     };
     this.postDatabaseService
-      .createPost(post)
-      res.status(201).json({post: post});
+      .createPost({post})
+      res.status(201).json({post});
   };
 
   /*
@@ -53,17 +45,22 @@ export default class BlogController {
 
   /*
    * Expects params with:
-   *    postTitle 
-   * Expects body with:
-   *    postContents
+   *    originalTitle 
+   * Expects body with
+   *    newTitle,
+   *    newContents,
+   *    newAuthor
+   *    newDate
    */
-  updatePostContents = (req: Request, res: Response, next: NextFunction) => {
-    this.postDatabaseService.updatePostContents({
-      postTitle: req.params.postTitle,
-      newContents: req.body.postContents,
-      dateChange: new Date()
+  updatePost = (req: Request, res: Response, next: NextFunction) => {
+    this.postDatabaseService.updatePost({
+      originalTitle: req.params.originalTitle,
+      newTitle: req.body.newTitle,
+      newContents: req.body.newContents,
+      newAuthor: req.body.newAuthor,
+      date: new Date(req.body.newDate as string),
     });
-    res.status(200);
+    res.status(200).json({success: true});
   }
 
   /*
@@ -72,6 +69,6 @@ export default class BlogController {
    */
   deletePost = (req: Request, res: Response, next: NextFunction) => {
     this.postDatabaseService.deletePost({postTitle: req.params.postTitle});
-    res.status(200);
+    res.status(200).json({success: true});
   }
 }
